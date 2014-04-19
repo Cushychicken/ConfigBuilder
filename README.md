@@ -1,5 +1,4 @@
 # ConfigBuilder
-================
 
 This is a project to easily build engineering bills of materials with small configuration changes. 
 It's a way to make the same bill of materials with a few component differences between them. No need to 

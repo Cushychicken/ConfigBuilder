@@ -2,7 +2,7 @@ import re
 
 def getPNList():
     """
-        Builds initial list of Part Numbers for qual build
+        Builds initial list of Part Numbers 
     """
     pn_re = re.compile(r'\d{3}-\d{5}')
     all_pns = []
@@ -54,21 +54,30 @@ def getConfigQuantity(build_configs):
     return config_qtys
     
 def getPartData(config_qtys):
-    extra_cfgs = {}
+    """
+        Gets all the manufacturer data for the new parts
+    """
+    config_data = []
     for cfg in config_qtys:
         if cfg[1]:
             i = 0
             cfg_list = []
-            while i < cfg[2]:
+            while i < int(cfg[2]):
                 print "%s: mfg configuration %d" % (cfg[0], (i+1))
                 mfg = raw_input("Please enter the manufacturer of new %s: " % cfg[0])
                 mpn = raw_input("Please enter the mfg part no. of new %s: " % cfg[0])
+                print
                 cfg_list.append([mfg, mpn])
                 i += 1
+            cfg.append(cfg_list)
+            config_data.append(cfg)
         else:
             mfg = raw_input("Please enter the manufacturer of new %s: " % cfg[0])
             mpn = raw_input("Please enter the mfg part no. of new %s: " % cfg[0])
-    
+            print
+            config_data.append(cfg + [mfg, mpn])
+    return config_data
+
 def getConfigCombinations(config_qtys):
     multi_cfg = [ cfg for cfg in config_qtys if cfg[1] ]
     print multi_cfg
@@ -78,6 +87,7 @@ if __name__ == '__main__':
     configs = getConfigStatus(all_pns)
     cfg_qty = getConfigQuantity(configs)
     cfg_inf = getPartData(cfg_qty)
+    print cfg_inf
     
     print 'Final PN List with Statuses and Qunatities'
     print '\n'.join([ cfg[0] + '\t' + str(cfg[1]) + '\t' + str(cfg[2]) for cfg in cfg_qty ])
