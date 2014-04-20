@@ -1,4 +1,5 @@
 import re
+from itertools import product
 
 def getPNList():
     """
@@ -43,7 +44,6 @@ def getConfigQuantity(build_configs):
     """
     config_qtys = []
     for cfg in build_configs:
-        print cfg
         if cfg[1]:
             qty = raw_input("Please enter the number of build configurations for %s (default is 1): " % cfg[0])
             cfg.append(qty)
@@ -61,16 +61,13 @@ def getPartData(config_qtys):
     for cfg in config_qtys:
         if cfg[1]:
             i = 0
-            cfg_list = []
             while i < int(cfg[2]):
                 print "%s: mfg configuration %d" % (cfg[0], (i+1))
                 mfg = raw_input("Please enter the manufacturer of new %s: " % cfg[0])
                 mpn = raw_input("Please enter the mfg part no. of new %s: " % cfg[0])
                 print
-                cfg_list.append([mfg, mpn])
+                config_data.append(cfg + [mfg, mpn])
                 i += 1
-            cfg.append(cfg_list)
-            config_data.append(cfg)
         else:
             mfg = raw_input("Please enter the manufacturer of new %s: " % cfg[0])
             mpn = raw_input("Please enter the mfg part no. of new %s: " % cfg[0])
@@ -78,6 +75,27 @@ def getPartData(config_qtys):
             config_data.append(cfg + [mfg, mpn])
     return config_data
 
+def buildConfigs(config_data):
+    """
+        Builds up the BOM configurations for cmpts with multiple substitutions
+    """
+    
+    # Sort out which PNs have multiple build configurations
+    single_configs = [ a for a in config_data if a[1] == False ]
+    multi_configs = [ a for a in config_data if a[1] == True ]
+    
+    # Stuff those into a PN-keyed dict of lists
+    config_tree = { a[0]: [] for a in multi_configs }
+    for cfg in multi_configs:
+        config_tree[cfg[0]].append(cfg)
+        
+    # Create all combinations of the multipart BOM items
+    each_bom = [ v for k,v in config_tree.iteritems() ]
+    configs = map(list, list(product(*each_bom)))
+    
+    bom_configs = [ cfg + single_configs for cfg in configs ]
+    return bom_configs
+    
 def getConfigCombinations(config_qtys):
     multi_cfg = [ cfg for cfg in config_qtys if cfg[1] ]
     print multi_cfg
@@ -87,7 +105,8 @@ if __name__ == '__main__':
     configs = getConfigStatus(all_pns)
     cfg_qty = getConfigQuantity(configs)
     cfg_inf = getPartData(cfg_qty)
-    print cfg_inf
+    configs = buildConfigs(cfg_inf)
+    print configs
     
     print 'Final PN List with Statuses and Qunatities'
     print '\n'.join([ cfg[0] + '\t' + str(cfg[1]) + '\t' + str(cfg[2]) for cfg in cfg_qty ])
