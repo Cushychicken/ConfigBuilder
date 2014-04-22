@@ -108,5 +108,14 @@ if __name__ == '__main__':
     configs = buildConfigs(cfg_inf)
     print configs
     
+    outfile = open('data_dump.txt', 'w')
+    for cfg in configs:
+        for item in cfg:
+            temp = [ str(a) for a in item ]
+            outfile.write('\t'.join(temp)+'\n')
+        outfile.write('\n')
+            
+    outfile.close()
+    
     print 'Final PN List with Statuses and Qunatities'
     print '\n'.join([ cfg[0] + '\t' + str(cfg[1]) + '\t' + str(cfg[2]) for cfg in cfg_qty ])
